@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag to build, for example v1.0.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: mlugg/setup-zig@v1
+        with:
+          version: 0.16.0
+
+      - name: Test
+        run: zig build test --summary all
+
+      - name: Resolve version
+        id: v
+        run: echo "version=${{ github.event.inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      # Zig cross-compiles every target from one machine, so there is no build
+      # matrix and no cross toolchain to install.
+      - name: Build all targets
+        run: ./scripts/build-release.sh "${{ steps.v.outputs.version }}"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.v.outputs.version }}
+          files: |
+            dist/*.tar.gz
+            dist/checksums.txt
+          generate_release_notes: true

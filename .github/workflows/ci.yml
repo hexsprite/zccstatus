@@ -1,0 +1,19 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v1
+        with:
+          version: 0.16.0
+      - run: zig fmt --check src build.zig
+      - run: zig build test --summary all
+      - run: zig build -Doptimize=ReleaseFast -Dstrip=true
+      - run: ./test/repro-cache.sh
