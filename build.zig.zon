@@ -1,0 +1,15 @@
+.{
+    .name = .zccstatus,
+    .version = "1.0.0",
+    .fingerprint = 0xad7c687a65c72a49,
+    // Zig 0.16 introduced the explicit `Io` parameter and the
+    // `std.process.Init` main signature. This code uses both.
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "README.md",
+    },
+}
