@@ -111,26 +111,51 @@ with open(p, "w") as f:
 PY
 }
 
+# Piping the script into sh leaves stdin pointing at the script, so the prompt
+# has to come from the terminal. That terminal may not exist: in CI, in a
+# container, or under a process with no controlling tty. Opening it must be
+# allowed to fail without taking the whole install down.
+ask() {
+  if [ -t 0 ]; then
+    printf '%s' "$1"
+    read -r reply || return 1
+    return 0
+  fi
+  [ -c /dev/tty ] || return 1
+  { exec 3</dev/tty; } 2>/dev/null || return 1
+  printf '%s' "$1"
+  if read -r reply <&3; then
+    exec 3<&-
+    return 0
+  fi
+  exec 3<&-
+  return 1
+}
+
+manual() {
+  say "Add this to $SETTINGS:"
+  say ""
+  say "$snippet"
+}
+
 say ""
-if [ -t 0 ] || [ -r /dev/tty ]; then
-  printf 'Set zccstatus as your Claude Code status line now? [y/N] '
-  if [ -t 0 ]; then read -r reply; else read -r reply < /dev/tty; fi
+reply=""
+if ask 'Set zccstatus as your Claude Code status line now? [y/N] '; then
+  say ""
   case "$reply" in
     [yY]*)
       if configure; then
         say "updated $SETTINGS (previous version saved alongside it)"
         say "refreshInterval is set to 5: the cache countdown needs a timer to tick."
       else
-        say "could not update $SETTINGS automatically. Add this yourself:"
-        say ""; say "$snippet"
+        say "could not update $SETTINGS automatically."
+        manual
       fi
       ;;
-    *)
-      say "Add this to $SETTINGS:"; say ""; say "$snippet"
-      ;;
+    *) manual ;;
   esac
 else
-  say "Add this to $SETTINGS:"; say ""; say "$snippet"
+  manual
 fi
 
 say ""
