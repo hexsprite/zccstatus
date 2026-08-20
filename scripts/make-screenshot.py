@@ -124,7 +124,7 @@ y += round(52 * SCALE)
 d.text((x0, y), "cyberpunk powerline status line for Claude Code",
        font=sub_f, fill=MUTED)
 y += round(28 * SCALE)
-d.text((x0, y), "one static Zig binary  ·  ~3ms per render  ·  no config files",
+d.text((x0, y), "one static Zig binary  ·  ~4ms per render  ·  no config files",
        font=sub_f, fill=MUTED)
 y += round(32 * SCALE)
 

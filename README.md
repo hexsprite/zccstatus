@@ -13,12 +13,14 @@ re-render several times a second, so that cost is paid constantly.
 
 | | zccstatus | `bunx ccstatusline` |
 |---|---|---|
-| Per render | **~3 ms** | ~450 ms |
+| Per render | **~4 ms** | ~443 ms |
 | Size | 300 KB | Node plus a package tree |
 | Dependencies | none | Node, npm |
 | Config file | none | yes |
 
-Measured on the same machine, same transcript, 50 runs each.
+Median of 200 runs against 10, same machine, same transcript, same payload.
+About 100x. Reproduce it with the numbers in `scripts/`, not by trusting this
+table.
 
 ## Install
 
