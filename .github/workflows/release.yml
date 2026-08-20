@@ -18,9 +18,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: mlugg/setup-zig@v1
-        with:
-          version: 0.16.0
+      # mlugg/setup-zig asks for zig-linux-x86_64-VERSION. Zig 0.16 renamed its
+      # archives to zig-x86_64-linux-VERSION, so every mirror returns 404.
+      # Fetching from ziglang.org directly avoids the whole problem.
+      - name: Install Zig
+        run: |
+          set -euo pipefail
+          v=0.16.0
+          url="https://ziglang.org/download/$v/zig-x86_64-linux-$v.tar.xz"
+          curl -fsSL "$url" -o /tmp/zig.tar.xz
+          echo "70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  /tmp/zig.tar.xz" | sha256sum -c -
+          sudo mkdir -p /opt/zig
+          sudo tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1
+          echo /opt/zig >> "$GITHUB_PATH"
+
+      - run: zig version
 
       - name: Test
         run: zig build test --summary all
